@@ -2,3 +2,5 @@ streamlit
 tensorflow-cpu
 tf-keras
 Pillow
+rich
+markdown-it-py
