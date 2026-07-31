@@ -2,28 +2,34 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import os
+import urllib.request
 
-# 1. ตั้งค่าหน้าตาเว็บ (Page Title & Icon)
+# ลิงก์ดาวน์โหลดโมเดลจาก GitHub Release ของคุณ
+MODEL_URL = "https://github.com/Pearandmeemo1234/Pneumonia-Detection/releases/download/v1.0/pneumonia_model.keras"
+MODEL_PATH = "pneumonia_model.keras"
+
 st.set_page_config(
     page_title="Chest X-Ray Pneumonia Detection AI",
     page_icon="🫁",
     layout="centered"
 )
 
-# 2. โหลดโมเดลแบบใช้ Cache
+# ดาวน์โหลดโมเดลลง Cloud หากยังไม่มีไฟล์
 @st.cache_resource
 def load_pneumonia_model():
-    return tf.keras.models.load_model('pneumonia_model.keras')
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("Downloading AI model... Please wait a moment."):
+            urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+    return tf.keras.models.load_model(MODEL_PATH)
 
 model = load_pneumonia_model()
 
-# 3. หัวข้อและรายละเอียดภาษาอังกฤษ
 st.title("🫁 Chest X-Ray Pneumonia Detection AI")
 st.write("Upload a chest X-Ray image to run an automated diagnostic analysis using MobileNetV2 deep learning model.")
 
 st.markdown("---")
 
-# 4. กล่องอัปโหลดรูปภาพ
 uploaded_file = st.file_uploader("Upload Chest X-Ray Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
