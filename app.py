@@ -1,93 +1,103 @@
+import os
+import urllib.request
 import numpy as np
 import streamlit as st
 import tensorflow as tf
 from PIL import Image
 
 # ---------------------------------------------------------
-# 1. Page Configuration
+# Model Download Configuration (Original GitHub Release)
+# ---------------------------------------------------------
+MODEL_URL = "https://github.com/Pearandmeemo1234/Pneumonia-Detection/releases/download/v1.0/pneumonia_model.keras"
+MODEL_PATH = "pneumonia_model.keras"
+
+# ---------------------------------------------------------
+# Page Configuration
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Pneumonia Detection AI", page_icon="🫁", layout="centered"
-)
-
-st.title("🫁 AI Chest X-Ray Pneumonia Detection System")
-st.write(
-    "A deep learning web application to classify chest X-ray images into Normal"
-    " or Pneumonia."
+    page_title="Chest X-Ray Pneumonia Detection AI",
+    page_icon="🫁",
+    layout="centered",
 )
 
 
 # ---------------------------------------------------------
-# 2. Load AI Model
+# Load & Cache Model (Downloads from GitHub Release if missing)
 # ---------------------------------------------------------
 @st.cache_resource
 def load_pneumonia_model():
-    model = tf.keras.models.load_model("pneumonia_model.h5")
-    return model
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("Downloading AI model... Please wait a moment."):
+            urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+    return tf.keras.models.load_model(MODEL_PATH)
 
 
 try:
     model = load_pneumonia_model()
-    st.success("✅ AI Model Loaded Successfully!")
 except Exception as e:
-    st.error(
-        "❌ Model file 'pneumonia_model.h5' not found. Please check your"
-        " directory."
-    )
-
-st.divider()
+    st.error(f"❌ Failed to load model from Release: {e}")
+    model = None
 
 # ---------------------------------------------------------
-# 3. Input Selection (Upload File vs. Take Photo)
+# App Interface Header
 # ---------------------------------------------------------
-option = st.radio(
-    "Select input method:",
-    ("📁 Upload Image File", "📷 Take a Photo via Camera"),
+st.title("🫁 Chest X-Ray Pneumonia Detection AI")
+st.write(
+    "Upload a chest X-Ray image or use your camera to run an automated"
+    " diagnostic analysis using MobileNetV2 deep learning model."
 )
 
-uploaded_image = None
+st.markdown("---")
 
-if option == "📁 Upload Image File":
-    uploaded_image = st.file_uploader(
-        "Choose a Chest X-Ray scan (JPG, PNG)", type=["jpg", "jpeg", "png"]
+# ---------------------------------------------------------
+# Input Method Selection (Upload File vs. Take Photo)
+# ---------------------------------------------------------
+input_option = st.radio(
+    "Select Input Method:",
+    ("📁 Upload Chest X-Ray Image", "📷 Take Photo with Camera"),
+)
+
+uploaded_file = None
+
+if input_option == "📁 Upload Chest X-Ray Image":
+    uploaded_file = st.file_uploader(
+        "Upload Chest X-Ray Image", type=["jpg", "jpeg", "png"]
     )
 else:
-    uploaded_image = st.camera_input("Take a photo of the X-ray film")
+    uploaded_file = st.camera_input("Take a photo of the Chest X-Ray film")
 
 # ---------------------------------------------------------
-# 4. Image Preprocessing & Prediction
+# Image Preprocessing & Prediction
 # ---------------------------------------------------------
-if uploaded_image is not None:
-    image = Image.open(uploaded_image).convert("RGB")
-    st.image(image, caption="Selected X-Ray Image", use_container_width=True)
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Selected Chest X-Ray Image", use_column_width=True)
 
-    if st.button("🔍 Analyze with AI", type="primary"):
-        with st.spinner("Analyzing image..."):
-
-            # --- Step A: Data Preprocessing ---
-            img_resized = image.resize((224, 224))
-            img_array = np.array(img_resized) / 255.0
+    if model is not None:
+        with st.spinner("Analyzing Chest X-Ray... Please wait."):
+            # Preprocessing
+            img = image.convert("RGB")
+            img = img.resize((224, 224))
+            img_array = np.array(img, dtype=np.float32) / 255.0
             img_array = np.expand_dims(img_array, axis=0)
 
-            # --- Step B: Prediction ---
-            prediction = model.predict(img_array)
-            probability = float(prediction[0][0])
+            # Prediction
+            prediction = model.predict(img_array)[0][0]
+            pneumonia_prob = float(prediction)
+            normal_prob = 1.0 - pneumonia_prob
 
-            st.divider()
-            st.subheader("📊 Diagnostic Results")
+            st.markdown("---")
+            st.subheader("Diagnostic Result")
 
-            # --- Step C: Display Results ---
-            if probability > 0.5:
-                p_percent = probability * 100
-                st.error("⚠️ **Risk Detected: Pneumonia**")
-                st.metric("Confidence Score", f"{p_percent:.2f}%")
+            if pneumonia_prob > 0.50:
+                st.error("🚩 **PNEUMONIA DETECTED**")
             else:
-                n_percent = (1 - probability) * 100
-                st.success("🎉 **Diagnosis: Normal (Healthy)**")
-                st.metric("Confidence Score", f"{n_percent:.2f}%")
+                st.success("✅ **NORMAL (NO PNEUMONIA)**")
 
-            st.caption(
-                "Disclaimer: This AI system provides preliminary screening"
-                " results only and should not replace professional medical"
-                " diagnosis by a radiologist."
-            )
+            st.subheader("Confidence Score")
+
+            st.write(f"**Normal:** {normal_prob * 100:.2f}%")
+            st.progress(normal_prob)
+
+            st.write(f"**Pneumonia:** {pneumonia_prob * 100:.2f}%")
+            st.progress(pneumonia_prob)
