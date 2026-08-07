@@ -71,7 +71,10 @@ else:
 # ---------------------------------------------------------
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Selected Chest X-Ray Image", use_column_width=True)
+    # แก้ไขจุดนี้เป็น use_container_width=True เรียบร้อยแล้วครับ
+    st.image(
+        image, caption="Selected Chest X-Ray Image", use_container_width=True
+    )
 
     if model is not None:
         with st.spinner("Analyzing Chest X-Ray... Please wait."):
