@@ -21,44 +21,56 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# Custom CSS Theme (Medical Teal / Aquamarine / DarkTurquoise)
+# Custom CSS Theme (Fixed for Dark Mode & High Contrast)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
-    /* พื้นหลังรวมของหน้าเว็บ โทนฟ้าเขียวอ่อนสะอาดตา */
+    /* 1. บังคับพื้นหลังหลักของเว็บ */
     .stApp {
-        background: linear-gradient(180deg, #eefbfb 0%, #f7fdfd 100%);
+        background: linear-gradient(180deg, #eefbfb 0%, #f7fdfd 100%) !important;
     }
 
-    /* หัวข้อหลัก (Title) */
+    /* 2. บังคับสีตัวหนังสือทั่วไป ไม่ว่าจะเปิด Dark Mode หรือ Light Mode */
+    .stApp, .stApp p, .stApp span, .stApp label, .stApp div {
+        color: #004d40 !important;
+    }
+
+    /* 3. หัวข้อหลักและหัวข้อย่อย */
     h1 {
         color: #005f60 !important;
         font-weight: 800 !important;
-        letter-spacing: -0.5px;
     }
-
-    /* หัวข้อย่อย (Subheaders) */
     h2, h3, h4 {
-        color: #008b8b !important;
+        color: #00796b !important;
         font-weight: 700 !important;
     }
 
-    /* ปรับแต่งกล่อง Radio Selection และ File Uploader ให้ดูเหมือนการ์ดทางการแพทย์ */
+    /* 4. กล่องตัวเลือก Radio และ File Uploader */
     div[data-testid="stFileUploader"], div[role="radiogroup"] {
-        background-color: #ffffff;
+        background-color: #ffffff !important;
         padding: 20px;
         border-radius: 16px;
-        border: 1.5px solid #7FFFD4;
+        border: 1.5px solid #7FFFD4 !important;
         box-shadow: 0 4px 15px rgba(0, 206, 209, 0.08);
     }
 
-    /* แต่งสีตัวหนังสือของตัวเลือก Radio */
-    div[role="radiogroup"] label {
-        color: #005f60 !important;
+    /* บังคับสีตัวหนังสือในกล่องให้เข้มชัดเจนเสมอ */
+    div[role="radiogroup"] label *, div[data-testid="stFileUploader"] label * {
+        color: #004d40 !important;
         font-weight: 600 !important;
     }
 
-    /* ปรับแต่งปุ่มกดอัปโหลด/กล้อง */
+    /* 5. ปรับแต่งพื้นที่อัปโหลดไฟล์ (Dropzone) ไม่ให้ดำใน Dark Mode */
+    [data-testid="stFileUploaderDropzone"] {
+        background-color: #f0fdfa !important;
+        border: 2px dashed #00CED1 !important;
+        border-radius: 12px !important;
+    }
+    [data-testid="stFileUploaderDropzone"] * {
+        color: #005f60 !important;
+    }
+
+    /* 6. ปุ่มกด */
     .stButton>button {
         background-color: #00CED1 !important;
         color: white !important;
@@ -69,19 +81,18 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0, 206, 209, 0.25);
         transition: all 0.3s ease;
     }
-
     .stButton>button:hover {
         background-color: #00b4b7 !important;
         box-shadow: 0 6px 14px rgba(0, 206, 209, 0.4);
         transform: translateY(-2px);
     }
 
-    /* ตกแต่งหลอด Progress Bar */
+    /* 7. Progress bar */
     .stProgress > div > div > div > div {
         background-color: #00CED1 !important;
     }
 
-    /* เส้นแบ่งโซน (Divider) */
+    /* 8. เส้นแบ่งโซน */
     hr {
         border-top: 2px solid #7FFFD4 !important;
         opacity: 0.6;
