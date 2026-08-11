@@ -20,6 +20,75 @@ st.set_page_config(
     layout="centered",
 )
 
+# ---------------------------------------------------------
+# Custom CSS Theme (Medical Teal / Aquamarine / DarkTurquoise)
+# ---------------------------------------------------------
+st.markdown("""
+    <style>
+    /* พื้นหลังรวมของหน้าเว็บ โทนฟ้าเขียวอ่อนสะอาดตา */
+    .stApp {
+        background: linear-gradient(180deg, #eefbfb 0%, #f7fdfd 100%);
+    }
+
+    /* หัวข้อหลัก (Title) */
+    h1 {
+        color: #005f60 !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.5px;
+    }
+
+    /* หัวข้อย่อย (Subheaders) */
+    h2, h3, h4 {
+        color: #008b8b !important;
+        font-weight: 700 !important;
+    }
+
+    /* ปรับแต่งกล่อง Radio Selection และ File Uploader ให้ดูเหมือนการ์ดทางการแพทย์ */
+    div[data-testid="stFileUploader"], div[role="radiogroup"] {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 16px;
+        border: 1.5px solid #7FFFD4;
+        box-shadow: 0 4px 15px rgba(0, 206, 209, 0.08);
+    }
+
+    /* แต่งสีตัวหนังสือของตัวเลือก Radio */
+    div[role="radiogroup"] label {
+        color: #005f60 !important;
+        font-weight: 600 !important;
+    }
+
+    /* ปรับแต่งปุ่มกดอัปโหลด/กล้อง */
+    .stButton>button {
+        background-color: #00CED1 !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: none !important;
+        padding: 10px 24px !important;
+        font-weight: bold !important;
+        box-shadow: 0 4px 10px rgba(0, 206, 209, 0.25);
+        transition: all 0.3s ease;
+    }
+
+    .stButton>button:hover {
+        background-color: #00b4b7 !important;
+        box-shadow: 0 6px 14px rgba(0, 206, 209, 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* ตกแต่งหลอด Progress Bar */
+    .stProgress > div > div > div > div {
+        background-color: #00CED1 !important;
+    }
+
+    /* เส้นแบ่งโซน (Divider) */
+    hr {
+        border-top: 2px solid #7FFFD4 !important;
+        opacity: 0.6;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 
 # ---------------------------------------------------------
 # Load & Cache Model (Downloads from GitHub Release if missing)
@@ -71,7 +140,6 @@ else:
 # ---------------------------------------------------------
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    # แก้ไขจุดนี้เป็น use_container_width=True เรียบร้อยแล้วครับ
     st.image(
         image, caption="Selected Chest X-Ray Image", use_container_width=True
     )
